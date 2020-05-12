@@ -71,15 +71,15 @@ HistoManager::HistoManager()
   fMessenger = new HistoManagerMessenger(this);
   fVerbose   = 1;
 
-  fParticleName  = "proton";
-  fElementName   = "Al";
+  fParticleName  = "neutron";
+  fElementName   = "C";
 
   fTargetMaterial = 0;
 
-  fMinKinEnergy  = 0.1*MeV;
-  fMaxKinEnergy  = 10*TeV;
-  fMinMomentum   = 1*MeV;
-  fMaxMomentum   = 10*TeV;
+  fMinKinEnergy  = 0.5*MeV;
+  fMaxKinEnergy  = 800.5*MeV;
+  fMinMomentum   = 1.5*MeV;
+  fMaxMomentum   = 701.5*MeV;
 
   fBinsE    = 800;
   fBinsP    = 700;
@@ -96,10 +96,10 @@ HistoManager::~HistoManager()
 
 void HistoManager::BeginOfRun()
 {
-  G4double p1 = std::log10(fMinMomentum/GeV);
-  G4double p2 = std::log10(fMaxMomentum/GeV);
-  G4double e1 = std::log10(fMinKinEnergy/MeV);
-  G4double e2 = std::log10(fMaxKinEnergy/MeV);
+  G4double p1 = fMinMomentum/GeV;
+  G4double p2 = fMaxMomentum/GeV;
+  G4double e1 = fMinKinEnergy/MeV;
+  G4double e2 = fMaxKinEnergy/MeV;
 
   //G4cout<<"e1= "<<e1<<" e2= "<<e2<<" p1= "<<p1<<" p2= "<<p2<<G4endl;
 
@@ -108,34 +108,34 @@ void HistoManager::BeginOfRun()
   fAnalysisManager->SetFirstHistoId(1);
 
   fAnalysisManager->CreateH1("h1",
-     "Elastic cross section (barn) as a functions of log10(p/GeV)",
+     "Elastic cross section (barn) as a functions of p/GeV",
                   fBinsP,p1,p2);
   fAnalysisManager->CreateH1("h2",
-     "Elastic cross section (barn) as a functions of log10(E/MeV)",
+     "Elastic cross section (barn) as a functions of E/MeV",
                   fBinsE,e1,e2);
   fAnalysisManager->CreateH1("h3",
-     "Inelastic cross section (barn) as a functions of log10(p/GeV)",
+     "Inelastic cross section (barn) as a functions of p/GeV",
                   fBinsP,p1,p2);
   fAnalysisManager->CreateH1("h4",
-     "Inelastic cross section (barn) as a functions of log10(E/MeV)",
+     "Inelastic cross section (barn) as a functions of E/MeV",
                   fBinsE,e1,e2);
   fAnalysisManager->CreateH1("h5",
-     "Capture cross section (barn) as a functions of log10(E/MeV)",
+     "Capture cross section (barn) as a functions of E/MeV",
                   fBinsE,e1,e2);
   fAnalysisManager->CreateH1("h6",
-     "Fission cross section (barn) as a functions of log10(E/MeV)",
+     "Fission cross section (barn) as a functions of E/MeV",
                   fBinsE,e1,e2);
   fAnalysisManager->CreateH1("h7",
-     "Charge exchange cross section (barn) as a functions of log10(E/MeV)",
+     "Charge exchange cross section (barn) as a functions of E/MeV",
                   fBinsE,e1,e2);
   fAnalysisManager->CreateH1("h8",
-     "Total cross section (barn) as a functions of log10(E/MeV)",
+     "Total cross section (barn) as a functions of E/MeV",
                   fBinsE,e1,e2);
   fAnalysisManager->CreateH1("h9",
-     "Inelastic cross section per volume as a functions of log10(E/MeV)",
+     "Inelastic cross section per volume as a functions of E/MeV",
                   fBinsE,e1,e2);
   fAnalysisManager->CreateH1("h10",
-     "Elastic cross section per volume as a functions of log10(E/MeV)",
+     "Elastic cross section per volume as a functions of E/MeV",
                   fBinsE,e1,e2);
 }
 
@@ -179,10 +179,10 @@ void HistoManager::EndOfRun()
 
   // Build histograms
 
-  G4double p1 = std::log10(fMinMomentum/GeV);
-  G4double p2 = std::log10(fMaxMomentum/GeV);
-  G4double e1 = std::log10(fMinKinEnergy/MeV);
-  G4double e2 = std::log10(fMaxKinEnergy/MeV);
+  G4double p1 = fMinMomentum/GeV;
+  G4double p2 = fMaxMomentum/GeV;
+  G4double e1 = fMinKinEnergy/MeV;
+  G4double e2 = fMaxKinEnergy/MeV;
   G4double de = (e2 - e1)/G4double(fBinsE);
   G4double dp = (p2 - p1)/G4double(fBinsP);
 
@@ -195,7 +195,7 @@ void HistoManager::EndOfRun()
 
   for(i=0; i<fBinsE; i++) {
     x += de;
-    e  = std::pow(10.,x)*MeV;
+    e  = x*MeV;
     if(fVerbose>0) G4cout << std::setw(5) << i << std::setw(12) << e;  
     xs = store->GetElasticCrossSectionPerAtom(particle,e,elm,mat);
     xtot = xs;
@@ -232,7 +232,7 @@ void HistoManager::EndOfRun()
   x = p1 - dp*0.5; 
   for(i=0; i<fBinsP; i++) {
     x += dp;
-    p  = std::pow(10.,x)*GeV;
+    p  = x*GeV;
     e  = std::sqrt(p*p + mass*mass) - mass;
     xs = store->GetElasticCrossSectionPerAtom(particle,e,elm,mat);
     fAnalysisManager->FillH1(1, x, xs/barn);    
